@@ -909,43 +909,9 @@ Comprehensive guides, references, and resources to help you get the most out of 
 
 ## Other Implementations
 
-> [!NOTE]
-> When implementing TOON in other languages, please follow the [Specification](https://github.com/toon-format/spec/blob/main/SPEC.md) to ensure compatibility across implementations. The [conformance tests](https://github.com/toon-format/spec/tree/main/tests) provide language-agnostic test fixtures that validate your implementations.
+TOON has official and community implementations across multiple languages including Python, Rust, Go, Java, Swift, .NET, and many more.
 
-### Official Implementations
-
-> [!TIP]
-> These implementations are actively being developed by dedicated teams. Contributions are welcome! Join the effort by opening issues, submitting PRs, or discussing implementation details in the respective repositories.
-
-- **.NET:** [toon_format](https://github.com/toon-format/toon-dotnet) *(in development)*
-- **Dart:** [toon](https://github.com/toon-format/toon-dart) *(in development)*
-- **Go:** [toon-go](https://github.com/toon-format/toon-go) *(in development)*
-- **Java:** [JToon](https://github.com/toon-format/toon-java)
-- **Julia:** [ToonFormat.jl](https://github.com/toon-format/ToonFormat.jl)
-- **Python:** [toon_format](https://github.com/toon-format/toon-python)
-- **Rust:** [toon_format](https://github.com/toon-format/toon-rust)
-- **Swift:** [toon-swift](https://github.com/toon-format/toon-swift)
-
-### Community Implementations
-
-- **Apex:** [ApexToon](https://github.com/Eacaw/ApexToon)
-- **C:** [TOONc](https://github.com/UsboKirishima/TOONc)
-- **C++:** [ctoon](https://github.com/mohammadraziei/ctoon)
-- **C#:** [ToonEncoder](https://github.com/Cysharp/ToonEncoder)
-- **Clojure:** [toon](https://github.com/vadelabs/toon)
-- **Crystal:** [toon-crystal](https://github.com/mamantoha/toon-crystal)
-- **Elixir:** [toon_ex](https://github.com/kentaro/toon_ex)
-- **Gleam:** [toon_codec](https://github.com/axelbellec/toon_codec)
-- **Go:** [gotoon](https://github.com/alpkeskin/gotoon)
-- **Scala:** [toon4s](https://github.com/vim89/toon4s)
-- **Lua/Neovim:** [toon.nvim](https://github.com/thalesgelinger/toon.nvim)
-- **OCaml:** [ocaml-toon](https://github.com/davesnx/ocaml-toon)
-- **Perl:** [Data::TOON](https://github.com/ytnobody/p5-Data-TOON)
-- **PHP:** [toon-php](https://github.com/HelgeSverre/toon-php)
-- **Laravel Framework:** [laravel-toon](https://github.com/mischasigtermans/laravel-toon)
-- **R**: [toon](https://github.com/laresbernardo/toon)
-- **Ruby:** [toon-ruby](https://github.com/andrepcg/toon-ruby)
-- **Kotlin:** [ktoon (using kotlinx.serialization)](https://github.com/lukelast/ktoon)
+See the full list of implementations in the [documentation](https://toon-format.org/ecosystem/implementations).
 
 ## Credits
 
