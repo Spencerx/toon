@@ -4,14 +4,27 @@ import { useClipboard, useDebounceFn } from '@vueuse/core'
 import { unzlibSync, zlibSync } from 'fflate'
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64, uint8ArrayToString } from 'uint8array-extras'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { parse as parseYaml, stringify as stringifyYaml } from 'yaml'
 import { DEFAULT_DELIMITER, encode } from '../../../../packages/toon/src'
 import VPInput from './VPInput.vue'
 
+type InputFormat = 'json' | 'yaml'
 type JsonFormat = 'pretty-2' | 'pretty-4' | 'pretty-tab' | 'compact'
 
 interface PlaygroundState extends Required<Pick<EncodeOptions, 'delimiter' | 'indent' | 'keyFolding' | 'flattenDepth'>> {
-  json: string
+  input: string
+  inputFormat: InputFormat
   jsonFormat: JsonFormat
+  /** Pre-YAML share URLs stored input under `json`. Read-only fallback. */
+  json?: string
+}
+
+function parseInput(text: string, format: InputFormat): unknown {
+  return format === 'yaml' ? parseYaml(text) : JSON.parse(text)
+}
+
+function stringifyInputYaml(value: unknown): string {
+  return stringifyYaml(value, { lineWidth: 0 })
 }
 
 const PRESETS = {
@@ -83,17 +96,19 @@ const DEFAULT_JSON = JSON.stringify(PRESETS.hikes, undefined, 2)
 const SHARE_URL_LIMIT = 8 * 1024
 
 // Input state
-const jsonInput = ref(DEFAULT_JSON)
+const inputText = ref(DEFAULT_JSON)
+const inputFormat = ref<InputFormat>('json')
 const jsonFormat = ref<JsonFormat>('pretty-2')
 const currentFormatIndent = computed(() =>
   JSON_FORMAT_OPTIONS.find(opt => opt.value === jsonFormat.value)?.indent,
 )
-const formattedJson = computed(() => {
+const formattedInput = computed(() => {
   try {
-    return formatJson(JSON.parse(jsonInput.value))
+    const data = parseInput(inputText.value, inputFormat.value)
+    return inputFormat.value === 'yaml' ? stringifyInputYaml(data) : formatJson(data)
   }
   catch {
-    return jsonInput.value
+    return inputText.value
   }
 })
 
@@ -106,7 +121,7 @@ const flattenDepth = ref(2)
 // Encoding output
 const encodingResult = computed(() => {
   try {
-    const parsedInput = JSON.parse(jsonInput.value)
+    const parsedInput = parseInput(inputText.value, inputFormat.value)
     return {
       output: encode(parsedInput, {
         indent: indent.value,
@@ -118,9 +133,10 @@ const encodingResult = computed(() => {
     }
   }
   catch (error) {
+    const fallback = inputFormat.value === 'yaml' ? 'Invalid YAML' : 'Invalid JSON'
     return {
       output: '',
-      error: error instanceof Error ? error.message : 'Invalid JSON',
+      error: error instanceof Error ? error.message : fallback,
     }
   }
 })
@@ -129,18 +145,18 @@ const error = computed(() => encodingResult.value.error)
 
 // Token analysis
 const tokenizer = shallowRef<typeof import('gpt-tokenizer') | undefined>()
-const jsonTokens = computed(() =>
-  tokenizer.value?.encode(formattedJson.value).length,
+const inputTokens = computed(() =>
+  tokenizer.value?.encode(formattedInput.value).length,
 )
 const toonTokens = computed(() =>
   tokenizer.value && toonOutput.value ? tokenizer.value.encode(toonOutput.value).length : undefined,
 )
 const tokenSavings = computed(() => {
-  if (!jsonTokens.value || !toonTokens.value)
+  if (!inputTokens.value || !toonTokens.value)
     return
 
-  const diff = jsonTokens.value - toonTokens.value
-  const percent = Math.abs((diff / jsonTokens.value) * 100).toFixed(1)
+  const diff = inputTokens.value - toonTokens.value
+  const percent = Math.abs((diff / inputTokens.value) * 100).toFixed(1)
   const sign = diff > 0 ? '−' : '+'
 
   return { diff, percent, sign, isSavings: diff > 0 }
@@ -165,13 +181,25 @@ const updateUrl = useDebounceFn(() => {
   window.history.replaceState(null, '', `#${hash}`)
 }, 300)
 
-watch([jsonInput, delimiter, indent, keyFolding, flattenDepth, jsonFormat], () => {
+watch([inputText, delimiter, indent, keyFolding, flattenDepth, jsonFormat, inputFormat], () => {
   updateUrl()
 })
 
 watch(jsonFormat, () => {
+  if (inputFormat.value !== 'json')
+    return
   try {
-    jsonInput.value = formatJson(JSON.parse(jsonInput.value))
+    inputText.value = formatJson(JSON.parse(inputText.value))
+  }
+  catch {}
+})
+
+watch(inputFormat, (next, prev) => {
+  if (prev === next)
+    return
+  try {
+    const data = parseInput(inputText.value, prev)
+    inputText.value = next === 'yaml' ? stringifyInputYaml(data) : formatJson(data)
   }
   catch {}
 })
@@ -185,12 +213,13 @@ onMounted(() => {
 
   const state = decodeState(hash)
   if (state) {
-    jsonInput.value = state.json
+    inputText.value = state.input ?? state.json
     delimiter.value = state.delimiter
     indent.value = state.indent
     keyFolding.value = state.keyFolding ?? 'safe'
     flattenDepth.value = state.flattenDepth ?? 2
     jsonFormat.value = state.jsonFormat ?? 'pretty-2'
+    inputFormat.value = state.inputFormat ?? 'json'
   }
 })
 
@@ -200,7 +229,8 @@ function formatJson(value: unknown) {
 
 function encodeState() {
   const state: PlaygroundState = {
-    json: jsonInput.value,
+    input: inputText.value,
+    inputFormat: inputFormat.value,
     delimiter: delimiter.value,
     indent: indent.value,
     keyFolding: keyFolding.value,
@@ -224,7 +254,8 @@ function decodeState(hash: string) {
 }
 
 function loadPreset(name: keyof typeof PRESETS) {
-  jsonInput.value = formatJson(PRESETS[name])
+  const data = PRESETS[name]
+  inputText.value = inputFormat.value === 'yaml' ? stringifyInputYaml(data) : formatJson(data)
 }
 
 async function copyShareUrl() {
@@ -247,11 +278,22 @@ async function loadTokenizer() {
       <!-- Header -->
       <header class="playground-header">
         <h1>Playground</h1>
-        <p>Experiment with JSON to TOON encoding in real-time.</p>
+        <p>Convert JSON or YAML to TOON in real time.</p>
       </header>
 
       <!-- Options Bar -->
       <div class="options-bar">
+        <VPInput id="inputFormat" label="Input format">
+          <select id="inputFormat" v-model="inputFormat">
+            <option value="json">
+              JSON
+            </option>
+            <option value="yaml">
+              YAML
+            </option>
+          </select>
+        </VPInput>
+
         <VPInput id="delimiter" label="Delimiter">
           <select id="delimiter" v-model="delimiter">
             <option v-for="opt in DELIMITER_OPTIONS" :key="opt.value" :value="opt.value">
@@ -312,7 +354,7 @@ async function loadTokenizer() {
           </select>
         </VPInput>
 
-        <VPInput id="jsonFormat" label="JSON Baseline">
+        <VPInput v-if="inputFormat === 'json'" id="jsonFormat" label="JSON Baseline">
           <select id="jsonFormat" v-model="jsonFormat">
             <option v-for="opt in JSON_FORMAT_OPTIONS" :key="opt.value" :value="opt.value">
               {{ opt.label }}
@@ -347,24 +389,24 @@ async function loadTokenizer() {
 
       <!-- Editor Container -->
       <div class="editor-container">
-        <!-- JSON Input -->
+        <!-- Input -->
         <div class="editor-pane">
           <div class="pane-header">
-            <span class="pane-title">JSON Input</span>
+            <span class="pane-title">{{ inputFormat === 'yaml' ? 'YAML Input' : 'JSON Input' }}</span>
             <span class="pane-stats">
-              <span class="stat-primary" title="Token count using selected JSON baseline format">{{ jsonTokens ?? '…' }} tokens</span>
-              <span class="stat-secondary">{{ formattedJson.length }} chars</span>
+              <span class="stat-primary" title="Token count of the formatted input">{{ inputTokens ?? '…' }} tokens</span>
+              <span class="stat-secondary">{{ formattedInput.length }} chars</span>
             </span>
           </div>
           <textarea
-            id="json-input"
-            v-model="jsonInput"
+            id="input"
+            v-model="inputText"
             class="editor-textarea"
             spellcheck="false"
-            aria-label="JSON input"
-            :aria-describedby="error ? 'json-error' : undefined"
+            :aria-label="inputFormat === 'yaml' ? 'YAML input' : 'JSON input'"
+            :aria-describedby="error ? 'parse-error' : undefined"
             :aria-invalid="!!error"
-            placeholder="Enter JSON here…"
+            :placeholder="inputFormat === 'yaml' ? 'Enter YAML here…' : 'Enter JSON here…'"
           />
         </div>
 
@@ -392,7 +434,7 @@ async function loadTokenizer() {
               @click="copy()"
             />
             <pre v-if="!error"><code>{{ toonOutput }}</code></pre>
-            <div v-else id="json-error" role="alert" class="error-message">
+            <div v-else id="parse-error" role="alert" class="error-message">
               {{ error }}
             </div>
           </div>
