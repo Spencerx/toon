@@ -1,11 +1,11 @@
 {
   "name": "@toon-format/monorepo",
   "type": "module",
-  "version": "2.3.1",
+  "version": "2.3.0",
   "private": true,
   "packageManager": "pnpm@11.13.0",
   "scripts": {
-    "build": "pnpm -r --filter=./packages/** run build",
+    "build": "pnpm -r --filter='./packages/**' run build",
     "automd": "automd",
     "docs:dev": "pnpm -C docs run dev",
     "docs:build": "pnpm -C docs run build",
