@@ -191,7 +191,7 @@ type EncodeReplacer = (
 import { encode } from '@toon-format/toon'
 
 const data = {
-  user: { name: 'Alice', password: 'secret123', email: 'alice@example.com' }
+  user: { name: 'Ada', password: 'secret123', email: 'ada@example.com' }
 }
 
 function replacer(key, value) {
@@ -207,8 +207,8 @@ console.log(encode(data, { replacer }))
 
 ```yaml
 user:
-  name: Alice
-  email: alice@example.com
+  name: Ada
+  email: ada@example.com
 ```
 
 **Transforming values:**
@@ -348,9 +348,9 @@ Returns a `JsonValue` (the parsed JavaScript value: object, array, or primitive)
 ```ts
 import { decodeFromLines } from '@toon-format/toon'
 
-const lines = ['name: Alice', 'age: 30']
+const lines = ['name: Ada', 'age: 30']
 const value = decodeFromLines(lines)
-// { name: 'Alice', age: 30 }
+// { name: 'Ada', age: 30 }
 ```
 
 **Streaming from Node.js readline:**
@@ -413,7 +413,7 @@ Returns an `Iterable<JsonStreamEvent>` that yields structured events (see [TypeS
 ```ts
 import { decodeStreamSync } from '@toon-format/toon'
 
-const lines = ['name: Alice', 'age: 30']
+const lines = ['name: Ada', 'age: 30']
 
 for (const event of decodeStreamSync(lines)) {
   console.log(event)
@@ -422,7 +422,7 @@ for (const event of decodeStreamSync(lines)) {
 // Output:
 // { type: 'startObject' }
 // { type: 'key', key: 'name' }
-// { type: 'primitive', value: 'Alice' }
+// { type: 'primitive', value: 'Ada' }
 // { type: 'key', key: 'age' }
 // { type: 'primitive', value: 30 }
 // { type: 'endObject' }
@@ -433,7 +433,7 @@ for (const event of decodeStreamSync(lines)) {
 ```ts
 import { decodeStreamSync } from '@toon-format/toon'
 
-const lines = ['users[2]{id,name}:', '  1,Alice', '  2,Bob']
+const lines = ['users[2]{id,name}:', '  1,Ada', '  2,Bob']
 let userCount = 0
 
 for (const event of decodeStreamSync(lines)) {
@@ -645,7 +645,7 @@ import { decode, encode } from '@toon-format/toon'
 
 const original = {
   users: [
-    { id: 1, name: 'Alice', role: 'admin' },
+    { id: 1, name: 'Ada', role: 'admin' },
     { id: 2, name: 'Bob', role: 'user' }
   ]
 }

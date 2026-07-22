@@ -311,19 +311,30 @@ key[N]{field1,field2,field3}:
 - `{fields}` = column names
 - Default delimiter: comma
 
+### Nested Field Groups
+
+```
+key[N]{id,customer{name,country},total}:
+```
+
+- `customer{…}` = a column of uniform sub-objects folded into the header
+- Rows stay flat: cells follow a depth-first walk of the field list
+
+See [Format Overview – Nested Field Groups](/guide/format-overview#nested-field-groups) for details.
+
 ### Alternative Delimiters
 
 ::: code-group
 
 ```yaml [Tab Delimiter]
 items[2	]{id	name}:
-  1	Alice
+  1	Ada
   2	Bob
 ```
 
 ```yaml [Pipe Delimiter]
 items[2|]{id|name}:
-  1|Alice
+  1|Ada
   2|Bob
 ```
 

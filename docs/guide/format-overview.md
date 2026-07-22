@@ -102,10 +102,10 @@ items[2]{sku,qty,price}:
   B2,1,14.5
 ```
 
-```yaml [With Spaces in Values]
+```yaml [Spaces and Quoting]
 users[2]{id,name,role}:
-  1,Alice Admin,admin
-  2,"Bob Smith",user
+  1,Ada Lovelace,admin
+  2,"Smith, Bob",user
 ```
 
 :::

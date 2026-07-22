@@ -33,8 +33,8 @@ export type {
  *
  * @example
  * ```ts
- * encode({ name: 'Alice', age: 30 })
- * // name: Alice
+ * encode({ name: 'Ada', age: 30 })
+ * // name: Ada
  * // age: 30
  *
  * encode({ users: [{ id: 1 }, { id: 2 }] })
@@ -61,8 +61,8 @@ export function encode(input: unknown, options?: EncodeOptions): string {
  *
  * @example
  * ```ts
- * decode('name: Alice\nage: 30')
- * // { name: 'Alice', age: 30 }
+ * decode('name: Ada\nage: 30')
+ * // { name: 'Ada', age: 30 }
  *
  * decode('users[2]:\n  - id: 1\n  - id: 2')
  * // { users: [{ id: 1 }, { id: 2 }] }
@@ -91,7 +91,7 @@ export function decode(input: string, options?: DecodeOptions): JsonValue {
  * @example
  * ```ts
  * // Stream to stdout
- * for (const line of encodeLines({ name: 'Alice', age: 30 })) {
+ * for (const line of encodeLines({ name: 'Ada', age: 30 })) {
  *   console.log(line)
  * }
  *
@@ -127,9 +127,9 @@ export function encodeLines(input: unknown, options?: EncodeOptions): Iterable<s
  *
  * @example
  * ```ts
- * const lines = ['name: Alice', 'age: 30']
+ * const lines = ['name: Ada', 'age: 30']
  * decodeFromLines(lines)
- * // { name: 'Alice', age: 30 }
+ * // { name: 'Ada', age: 30 }
  * ```
  */
 export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions): JsonValue {
@@ -151,12 +151,12 @@ export function decodeFromLines(lines: Iterable<string>, options?: DecodeOptions
  *
  * @example
  * ```ts
- * const lines = ['name: Alice', 'age: 30']
+ * const lines = ['name: Ada', 'age: 30']
  * for (const event of decodeStreamSync(lines)) {
  *   console.log(event)
  *   // { type: 'startObject' }
  *   // { type: 'key', key: 'name' }
- *   // { type: 'primitive', value: 'Alice' }
+ *   // { type: 'primitive', value: 'Ada' }
  *   // ...
  * }
  * ```
@@ -186,7 +186,7 @@ export function decodeStreamSync(lines: Iterable<string>, options?: DecodeStream
  *   console.log(event)
  *   // { type: 'startObject' }
  *   // { type: 'key', key: 'name' }
- *   // { type: 'primitive', value: 'Alice' }
+ *   // { type: 'primitive', value: 'Ada' }
  *   // ...
  * }
  * ```

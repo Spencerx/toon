@@ -758,14 +758,14 @@ import { encode } from '@toon-format/toon'
 
 const data = {
   users: [
-    { id: 1, name: 'Alice', role: 'admin' },
+    { id: 1, name: 'Ada', role: 'admin' },
     { id: 2, name: 'Bob', role: 'user' }
   ]
 }
 
 console.log(encode(data))
 // users[2]{id,name,role}:
-//   1,Alice,admin
+//   1,Ada,admin
 //   2,Bob,user
 ```
 
@@ -791,11 +791,11 @@ for (const line of encodeLines(largeData)) {
 import { encode } from '@toon-format/toon'
 
 // Remove sensitive fields
-const user = { name: 'Alice', password: 'secret', email: 'alice@example.com' }
+const user = { name: 'Ada', password: 'secret', email: 'ada@example.com' }
 const safe = encode(user, {
   replacer: (key, value) => key === 'password' ? undefined : value
 })
-// name: Alice
+// name: Ada
 // email: alice@example.com
 
 // Transform values
