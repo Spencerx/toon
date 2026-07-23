@@ -85,36 +85,6 @@ export function parseLineIncremental(
   return { raw, indent, content, depth, lineNumber }
 }
 
-export function* parseLinesSync(
-  source: Iterable<string>,
-  indentSize: number,
-  strict: boolean,
-  state: StreamingScanState,
-): Generator<ParsedLine> {
-  for (const raw of source) {
-    const parsedLine = parseLineIncremental(raw, state, indentSize, strict)
-
-    if (parsedLine !== undefined) {
-      yield parsedLine
-    }
-  }
-}
-
-export async function* parseLinesAsync(
-  source: AsyncIterable<string>,
-  indentSize: number,
-  strict: boolean,
-  state: StreamingScanState,
-): AsyncGenerator<ParsedLine> {
-  for await (const raw of source) {
-    const parsedLine = parseLineIncremental(raw, state, indentSize, strict)
-
-    if (parsedLine !== undefined) {
-      yield parsedLine
-    }
-  }
-}
-
 function computeDepthFromIndent(indentSpaces: number, indentSize: number): Depth {
   return Math.floor(indentSpaces / indentSize)
 }
